@@ -591,7 +591,7 @@ a:visited {
 --------------------------------------------------------------*/
 
 .site-header-one {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .site-header-one__fixed-top {
@@ -600,6 +600,7 @@ a:visited {
   left: 0;
   width: 100%;
   z-index: 91;
+  opacity: 10;
 }
 
 .site-header-one .container-fluid {
@@ -4379,7 +4380,7 @@ a:visited {
 --------------------------------------------------------------*/
 
 .faq-one {
-  padding-bottom: 120px;
+  padding-bottom: 60px;
   position: relative;
   background-image: url(../images/shapes/faq-dot-1-1.png);
   background-position: bottom center;

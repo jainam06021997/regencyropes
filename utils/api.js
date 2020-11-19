@@ -1,6 +1,7 @@
 const http = async (path, args) => {
     try {
-      const url = 'http://localhost:3001' + path;
+      // const url = 'http://localhost:3001' + path; // local
+      const url = 'http://regencyropes.in/admin' + path; // live
       const headers= {
         'Content-type': 'application/json',
       };

@@ -6,13 +6,13 @@ import faqBG from "../assets/images/shapes/faq-bg-1-1.png";
 
 const FAQ = (props) => {
   return (
-    <section className="faq-one">
+    <section className="faq-one" id="faq">
       <img src={faqBG} className="faq-one__bg-shape-1" alt="" />
       <Container>
         <BlockTitle
           textAlign="center"
           paraText="Frequently Asked Questions"
-          titleText={`Want to Ask Something \n From Appton?`}
+          titleText={`Want to Ask Something ?`}
         />
         <div className="accrodion-grp faq-accrodion">
           <AccordionItem

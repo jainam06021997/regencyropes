@@ -44,7 +44,7 @@ const HomePage = () => {
         {/* <Team /> */}
         {/* <VideoOne /> */}
         <AppScreen />
-        {/* <FAQ /> */}
+        <FAQ />
         {/* <BlogHome /> */}
         <Contact />
         {/* <CTAThree /> */}

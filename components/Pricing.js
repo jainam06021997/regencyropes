@@ -4,20 +4,49 @@ import BlockTitle from "./BlockTitle";
 import PPROPE from "../assets/images/pprope.jpg";
 import HDPEROPE from "../assets/images/hdperope.jpg";
 import PLASTICSUTLI from "../assets/images/plasticsutli.jpg";
+import api from '../utils/api';
 
 const Pricing = (props) => {
   const [showQuoteModal, setShowQuoteModal] = React.useState(false);
   const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [showCallbackForm, setShowCallbackForm] = React.useState(false);
   const [productToShow, setProductToShow] = React.useState(null);
   const [formFields, setFormfields] = React.useState({
     size: '',
     length: '',
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+    country: '',
+    state: '',
   });
   const [errors, setErrors] = React.useState({
     size: '',
     length: '',
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+    country: '',
+    state: '',
   });
   const [estimatedWeight, setWeight] = React.useState(null);
+  const [countryList, setCountry] = React.useState([]);
+  const [stateList, setState] = React.useState([]);
+
+  const emailRegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const phoneRegExp = /^[0-9]{10}$/;
+
+  React.useEffect(() => {
+    api.get('/api/getCountry').then((res) => {
+      setCountry(res.data);
+    }).catch((err) => {
+
+    });
+  }, []);
 
   const productsList = [
     {
@@ -99,11 +128,25 @@ const Pricing = (props) => {
       ...prev,
       size: '',
       length: '',
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: '',
+      country: '',
+      state: '',
     }));
     setErrors((prev) => ({
       ...prev,
       size: '',
       length: '',
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: '',
+      country: '',
+      state: '',
     }));
   };
 
@@ -113,6 +156,9 @@ const Pricing = (props) => {
     } else if (modalType === 'quoteModal') {
       setShowQuoteModal(false);
       setWeight(null);
+      _resetForm();
+    } else if (modalType === 'callbackModal') {
+      setShowCallbackForm(false);
       _resetForm();
     }
     setProductToShow(null);
@@ -127,6 +173,11 @@ const Pricing = (props) => {
     setShowDetailModal(true);
     setProductToShow(product);
   };
+
+  const _requestCallback = (product) => {
+    setShowCallbackForm(true);
+    setProductToShow(product);
+  }
 
   const isEmpty = (value) => {
     if (value === '' || value === null || value === undefined) {
@@ -191,9 +242,208 @@ const Pricing = (props) => {
     }
   };
 
+  const _validateCallbackForm = (field, value) => {
+    let hasError = false;
+    const isEmptyValue = isEmpty(value);
+    if (field === 'name') {
+      if (isEmptyValue) {
+        hasError = true;
+        setErrors((prev) => ({
+          ...prev,
+          name: 'This field is required',
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          name: ''
+        }));
+      }
+    }
+    if (field === 'email') {
+      if (isEmptyValue || !emailRegExp.test(value)) {
+        hasError = true;
+        setErrors((prev) => ({
+          ...prev,
+          email: isEmptyValue ? 'Email is required' : 'Email is invallid',
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          email: '',
+        }));
+      }
+    }
+    if (field === 'phone') {
+      if (isEmptyValue || !phoneRegExp.test(value)) {
+        hasError = true;
+        setErrors((prev) => ({
+          ...prev,
+          phone: isEmptyValue ? 'Phone number is required' : 'Phone number is invalid',
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          phone: '',
+        }));
+      }
+    }
+    if (field === 'subject') {
+
+    }
+    if (field === 'message') {
+
+    }
+    return hasError;
+  };
+
+  const _handleCallbackFormChange = (e) => {
+    const {value, name} = e.target;
+    setFormfields((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    _validateCallbackForm(name, value);
+  };
+
+  const _handleSelect = (e) => {
+    const {value, name} = e.target;
+    setFormfields((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    if (name === 'country') {
+      setFormfields((prev) => ({
+        ...prev,
+        state: '',
+      }));
+      if (value === '') {
+        setState([]);
+      } else {
+        api.get('/api/getState/' + value).then((res) => {
+          setState(res.data);
+        }).catch((err) => {
+  
+        });
+      }
+    }
+  };
+
+  const _handleSubmit = (e) => {
+    e.preventDefault();
+    let errCount = 0;
+    Object.keys(formFields).map((field, i) => {
+      errCount = _validateCallbackForm(field, formFields[field]) ? errCount + 1 : errCount;
+    });
+    console.log('ere', errCount);
+    if (errCount === 0) {
+      const reqObj = {
+        name: formFields.name.trim(),
+        email: formFields.email.trim(),
+        phone: formFields.phone.trim(),
+        subject: formFields.subject.trim(),
+        message: formFields.message.trim(),
+        country: formFields.country,
+        state: formFields.state,
+        product: productToShow.name,
+      };
+      api.post('/api/contactus', reqObj).then((res) => {
+        _handleClose('callbackModal');
+        _resetForm();
+      }).catch((err) => {
+
+      });
+    }
+  };
+
   return (
     <section className="pricing-one" id="products">
       <Container>
+
+      <Modal show={showCallbackForm} onHide={() => _handleClose('callbackModal')} dialogClassName="modal-90w" size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{productToShow ? productToShow.name : ''}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="show-grid">
+          <Row>
+            <Col md={12}>
+              <h4>{`Have Question? Write \n a Message`}</h4>
+            </Col>
+          </Row>
+          <form className="contact-form-validated contact-one__form">
+            <div className="row">
+              <div className="col-lg-6">
+                <input type="text" placeholder="Name" name="name" id="name" onChange={_handleCallbackFormChange} value={formFields.name} autoComplete="of" />
+                {errors.name && errors.name !== '' && (
+                  <em style={{color: '#fd632f'}}>{errors.name}</em>
+                )}
+              </div>
+              <div className="col-lg-6">
+                <input type="text" placeholder="Email Address" name="email" id="email" onChange={_handleCallbackFormChange} value={formFields.email} autoComplete="of" />
+                {errors.email && errors.email !== '' && (
+                  <em style={{color: '#fd632f'}}>{errors.email}</em>
+                )}
+              </div>
+              <div className="col-lg-6">
+                <input type="text" placeholder="Subject" name="subject" id ="subject" onChange={_handleCallbackFormChange} value={formFields.subject} autoComplete="of" />
+                {errors.subject && errors.subject !== '' && (
+                  <em style={{color: '#fd632f'}}>{errors.subject}</em>
+                )}
+              </div>
+              <div className="col-lg-6">
+                <input type="text" placeholder="Phone Number" name="phone" id="phone" onChange={_handleCallbackFormChange} value={formFields.phone} autoComplete="of" />
+                {errors.phone && errors.phone !== '' && (
+                  <em style={{color: '#fd632f'}}>{errors.phone}</em>
+                )}
+              </div>
+              <div className="col-lg-6">
+                <select name="country" id="country" value={formFields.country} onChange={_handleSelect}>
+                  <option value="">Select Country</option>
+                  {countryList.map((country) => {
+                    return (
+                      <option key={country.country_id} value={country.country_id}>{country.country_name}</option>
+                    );
+                  })}
+                </select>
+              </div>
+              <div className="col-lg-6">
+                {stateList.length ? (
+                  <select name="state" id="state" value={formFields.state} onChange={_handleSelect}>
+                    <option value="">Select State</option>
+                    {stateList.map((state) => {
+                      return (
+                        <option key={state.state_id} value={state.state_id}>{state.state_name}</option>
+                      );
+                    })}
+                  </select>
+                ) : (
+                  <input type="text" placeholder="State" name="state" id="state" onChange={_handleCallbackFormChange} value={formFields.state} autoComplete="of" />
+                )}
+              </div>
+              <div className="col-lg-12">
+                <textarea
+                  placeholder="Write Message"
+                  name="message"
+                  id="message"
+                  onChange={_handleCallbackFormChange}
+                  value={formFields.message}
+                  autoComplete="of"
+                ></textarea>
+                {errors.message && errors.message !== '' && (
+                  <em style={{color: '#fd632f'}}>{errors.name}</em>
+                )}
+              </div>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => _handleClose('callbackModal')}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={_handleSubmit}>
+            Send
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Modal show={showQuoteModal} onHide={() => _handleClose('quoteModal')}>
         <Modal.Header closeButton>
@@ -244,7 +494,7 @@ const Pricing = (props) => {
               <Col xs={8}>
                 <p>
                   <b>ESTIMATED WEIGHT: </b>
-                  <span>{estimatedWeight}</span>
+                  <span>{`${estimatedWeight}/KG`}</span>
                 </p>
               </Col>
               <Col xs={2}></Col>
@@ -323,6 +573,11 @@ const Pricing = (props) => {
                       <img src={product.image} alt="rope" style={{width: 200, height: 220}} />
                       <br />
                       <h3>{product.name}</h3>
+                      <br />
+                      <button type='button' onClick={() => _requestCallback(product)} className="thm-btn pricing-one__btn">
+                        <span>REQUEST CALLBACK</span>
+                      </button>
+                      <br />
                       <br />
                       <button type='button' onClick={() => _getQuote(product)} className="thm-btn pricing-one__btn">
                         <span>GET QUOTE</span>
