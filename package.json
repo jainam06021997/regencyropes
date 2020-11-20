@@ -1,6 +1,7 @@
 {
   "name": "apiton-react",
   "version": "1.0.0",
+  "homepage": "http://regencyropes.in/public_html/web",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
@@ -21,7 +22,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start"
   }
 }
